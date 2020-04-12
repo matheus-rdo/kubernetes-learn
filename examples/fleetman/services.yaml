@@ -1,0 +1,38 @@
+# Fila
+apiVersion: v1
+kind: Service
+metadata:
+  # Este nome é extremamente importante, pois está
+  # sendo utilizado pelo serviço de DNS do Kubernetes
+  name: fleetman-queue
+spec:
+  selector:
+    app: queue
+    
+  ports:
+  - name: http
+    port: 8161
+    # Expõe a porta para a Internet
+    nodePort: 30010
+
+    # Endpoint interno para enviar/receber mensagens
+  - name: endpoint
+    port: 61616   
+    
+  type: NodePort
+---
+# Position Tracker
+# Expoe uma interface que detalha as informações da frota
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-position-tracker
+spec:
+  selector:
+    app: position-tracker
+  ports:
+  - name: http
+    port: 8080
+  # Acessível apenas internamente  
+  type: ClusterIP 
+
