@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-client
+spec:
+  selector:
+    matchLabels:
+      app: mysql-client
+  template:
+    metadata:
+      labels:
+        app: mysql-client
+    spec:
+      containers:
+      - name: mysql-client
+        image: phpmyadmin/phpmyadmin:latest
+        ports:
+          - containerPort: 80
+        env:
+            # Altera o Host do Client para utilizar DNS "database", que faz referência ao banco
+          - name: PMA_HOST
+            value: database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-client
+spec:
+  selector:
+    app: mysql-client
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    nodePort: 30090
+  type: NodePort
+

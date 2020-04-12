@@ -1,0 +1,1 @@
+## Conexão entre phpMyAdmin e banco MySQL
