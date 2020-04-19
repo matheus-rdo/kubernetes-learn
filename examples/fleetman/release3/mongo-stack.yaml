@@ -1,0 +1,44 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:3.6.5-jessie
+        volumeMounts:
+            # Mapeando o diretório do container que contém os dados para um volume chamado 'mongo-persistent-storage'
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+      volumes:
+          # O Volume é definido como um diretório na máquina Host
+          # Em ambientes em nuvem, ao invés de utilizarmos 'hostPath',
+          # o Kubernetes permite diversas configurações específicas de persistencia para cada Cloud Provider, como EBS da AWS por exemplo.
+        - name: mongo-persistent-storage
+          # Usar PVC's é uma boa prática para isolar as configurações de persistência
+          # Delegando a configuração de COMO gostaríamos de fazer esse mount do volume para o PVC 'mongo-pvc'
+          # Assim é possível deixar essas configurações em outro arquivo YAML,
+          # tornando fácil a troca das definições de mapeamento entre diversas formas e Cloud Providers.
+          persistentVolumeClaim:
+              claimName: mongo-pvc
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+  type: ClusterIP

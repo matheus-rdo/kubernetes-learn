@@ -1,0 +1,38 @@
+# Define o que queremos p/ Storage
+# Pode incluir especificações como quantidade de espaço e etc..
+
+# Este PVC irá pesquisar no Cluster por qualquer PersistentVolume
+# Que satisfaça os requisitos: Capacidade Suficiente, Access Mode e StorageClassName igual
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  # Efetua o binding com o PersistentVolume declarado abaixo
+  storageClassName: mylocalstorage
+  accessModes:
+    - ReadWriteOnce
+  # Especificando que PRECISAMOS 20GB...  
+  resources:
+    requests:
+      storage: 20Gi
+---
+# Define como queremos que o Storage seja implementado
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage
+spec:
+  storageClassName: mylocalstorage
+  # Isso não terá efeito no caso do 'hostPath' explicado abaixo
+  # Porém pode ser útil quando utilizado com o EBS, para explicitar o tamanho do volume provisionado
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  # O Volume é definido como um diretório na máquina Host
+  # Em ambientes em nuvem, ao invés de utilizarmos 'hostPath',
+  # o Kubernetes permite diversas configurações específicas de persistencia para cada Cloud Provider, como EBS da AWS por exemplo.
+  hostPath:
+    path: /mnt/mongodb/
+    type: DirectoryOrCreate
